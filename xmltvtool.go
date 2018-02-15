@@ -1,7 +1,7 @@
 package main
 
 import (
-    "log"
+//    "log"
 //    "os"
     "encoding/xml"
 //    "io"
@@ -9,6 +9,8 @@ import (
 //    "errors"
     "time"
     "flag"
+    "sort"
+    "fmt"
 )
 
 const timefmt = "20060102150405 -0700"
@@ -90,19 +92,20 @@ func demo() *tv{
 }
 
 func main(){
-
     flag_join := flag.Bool("j", false, "Concatenate multiple XMLTV files")
     flag_read := flag.Bool("r", false, "Read multiple XMLTV files")
-    flag_demo := flag.Bool("d", false, "Generate demo data")
+    flag_demo := flag.Bool("d", false, "Demo data")
+    flag_gaps := flag.Bool("g", false, "Check data gaps")
+    flag_over := flag.Bool("o", false, "Check data overlaps")
 
     flag.Parse()
 
     if *flag_join{
         tv := NewXMLTVFile()
         for _, path := range flag.Args(){
-            log.Println(path, flag.Args())
+            //fmt.Println(path, flag.Args())
             thistv, err := ReadFile(path); if err != nil{
-                log.Println(path, err)
+                //fmt.Println(path, err)
                 continue
             }
 
@@ -116,29 +119,73 @@ func main(){
         }
 
         data, err := marshal(tv); if err != nil{
-            log.Println(err)
+            fmt.Println(err)
         }
 
-        log.Println(string(data))
+        fmt.Println(string(data))
     }
 
     if *flag_read{
         for _, path := range flag.Args(){
             tv, err := ReadFile(path); if err != nil{
-                log.Println(err)
+                fmt.Println(err)
             }
 
             tv.Channel = tv.Channel[:2]
             tv.Programme = tv.Programme[:2]
 
             data, err := marshal(tv)
-            log.Println(string(data))
+            fmt.Println(string(data))
         }
     }
 
     if *flag_demo{
         data, err := marshal(demo())
-        log.Println(string(data), err)
+        fmt.Println(string(data), err)
+    }
+
+    if *flag_gaps{
+        path := flag.Args()[0]
+        tv, err := ReadFile(path); if err != nil{
+            fmt.Println(err)
+        }
+
+        for _, c := range tv.Channel{
+            progs := make([]*XMLTVProgramme, 0)
+            for _, p := range tv.Programme{
+                if p.Channel == c.Id{
+                    progs = append(progs, p)
+                }
+            }
+            fmt.Println("Channel", c, "has", len(progs), "programs")
+            sort.Slice(progs, func(i, j int) bool{ return progs[i].Start < progs[j].Start })
+            var prev *XMLTVProgramme
+            for _, p := range progs{
+                if prev == nil{
+                    prev = p
+                    continue
+                }
+
+                stop, _ := parseTime(prev.Stop)
+                start, _ := parseTime(p.Start)
+
+                if start.Sub(stop) > (5 * time.Minute){
+                    fmt.Println("\tGAP!", start.Sub(stop), "from", stop, "until", start, prev.Title, " -> ", p.Title)
+                }
+
+                //fmt.Println(start.Sub(stop))
+
+                //if prev.Stop != p.Start{
+                //    fmt.Println(prev.Stop, p.Start, prev.Stop == p.Start)
+                //    fmt.Printf("%+v\n", p)
+                //}
+
+                prev = p
+            }
+        }
+
+    }
+
+    if *flag_over{
     }
 }
-
