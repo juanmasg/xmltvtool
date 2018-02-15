@@ -122,6 +122,7 @@ func main(){
             fmt.Println(err)
         }
 
+        data = append([]byte(xml.Header), data...)
         fmt.Println(string(data))
     }
 
@@ -159,18 +160,21 @@ func main(){
             }
             fmt.Println("Channel", c, "has", len(progs), "programs")
             sort.Slice(progs, func(i, j int) bool{ return progs[i].Start < progs[j].Start })
-            var prev *XMLTVProgramme
-            for _, p := range progs{
-                if prev == nil{
-                    prev = p
-                    continue
-                }
+
+            if len(progs) == 0{
+                fmt.Println("No programme for channel", c)
+                continue
+            }
+
+            prev := progs[0]
+
+            for _, cur := range progs[1:]{
 
                 stop, _ := parseTime(prev.Stop)
-                start, _ := parseTime(p.Start)
+                start, _ := parseTime(cur.Start)
 
                 if start.Sub(stop) > (5 * time.Minute){
-                    fmt.Println("\tGAP!", start.Sub(stop), "from", stop, "until", start, prev.Title, " -> ", p.Title)
+                    fmt.Println("\tGAP!", start.Sub(stop), "from", stop, "until", start, prev.Title, " -> ", cur.Title)
                 }
 
                 //fmt.Println(start.Sub(stop))
@@ -180,7 +184,7 @@ func main(){
                 //    fmt.Printf("%+v\n", p)
                 //}
 
-                prev = p
+                prev = cur
             }
         }
 
