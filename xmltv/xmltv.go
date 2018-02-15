@@ -10,24 +10,24 @@ const timefmt = "20060102150405 -0700"
 
 type tv struct{
     XMLName     xml.Name            `xml:"tv"`
-    Channel     []*XMLTVChannel     `xml:"channel"`
-    Programme   []*XMLTVProgramme   `xml:"programme"`
+    Channel     []*Channel     `xml:"channel"`
+    Programme   []*Programme   `xml:"programme"`
 }
 
 func NewXMLTVFile() *tv{
     xmltvf := &tv{}
-    xmltvf.Channel = make([]*XMLTVChannel, 0)
-    xmltvf.Programme = make([]*XMLTVProgramme, 0)
+    xmltvf.Channel = make([]*Channel, 0)
+    xmltvf.Programme = make([]*Programme, 0)
 
     return xmltvf
 }
 
-type XMLTVChannel struct{
+type Channel struct{
     Id      string  `xml:"id,attr"`
     Name    string  `xml:"display-name"`
 }
 
-type XMLTVProgramme struct{
+type Programme struct{
     Start       string  `xml:"start,attr"`
     Stop        string  `xml:"stop,attr"`
     Channel     string  `xml:"channel,attr"`
@@ -79,12 +79,12 @@ func WriteFile(path string, data []byte) error{
 
 func Demo() *tv{
     xmltvf := NewXMLTVFile()
-    xmltvf.Channel = append(xmltvf.Channel, &XMLTVChannel{Id: "0", Name: "AAAA" })
-    xmltvf.Channel = append(xmltvf.Channel, &XMLTVChannel{Id: "1", Name: "BBBB" })
+    xmltvf.Channel = append(xmltvf.Channel, &Channel{Id: "0", Name: "AAAA" })
+    xmltvf.Channel = append(xmltvf.Channel, &Channel{Id: "1", Name: "BBBB" })
 
-    xmltvf.Programme = append(xmltvf.Programme, &XMLTVProgramme{
+    xmltvf.Programme = append(xmltvf.Programme, &Programme{
         Start: TimeString(time.Now()), Stop: TimeString(time.Now().Add(30 *time.Minute)), Channel: "0", Title: "aaaaa title", Date: "asdasd" })
-    xmltvf.Programme = append(xmltvf.Programme, &XMLTVProgramme{
+    xmltvf.Programme = append(xmltvf.Programme, &Programme{
         Start: TimeString(time.Now()), Stop: TimeString(time.Now().Add(30 *time.Minute)), Channel: "1", Title: "bbbbb title", Date: "asdasd" })
 
     return xmltvf

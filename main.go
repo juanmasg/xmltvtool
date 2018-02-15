@@ -68,7 +68,7 @@ func main(){
         }
 
         for _, c := range tv.Channel{
-            progs := make([]*xmltv.XMLTVProgramme, 0)
+            progs := make([]*xmltv.Programme, 0)
             for _, p := range tv.Programme{
                 if p.Channel == c.Id{
                     progs = append(progs, p)
