@@ -8,14 +8,14 @@ import (
 
 const timefmt = "20060102150405 -0700"
 
-type tv struct{
+type Tv struct{
     XMLName     xml.Name            `xml:"tv"`
     Channel     []*Channel     `xml:"channel"`
     Programme   []*Programme   `xml:"programme"`
 }
 
-func NewXMLTVFile() *tv{
-    xmltvf := &tv{}
+func NewXMLTVFile() *Tv{
+    xmltvf := &Tv{}
     xmltvf.Channel = make([]*Channel, 0)
     xmltvf.Programme = make([]*Programme, 0)
 
@@ -59,7 +59,7 @@ func Unmarshal(data []byte, v interface{}) error{
     return xml.Unmarshal(data, v)
 }
 
-func ReadFile(path string) (*tv, error){
+func ReadFile(path string) (*Tv, error){
     data, err := ioutil.ReadFile(path); if err != nil{
         return nil, err
     }
@@ -77,7 +77,7 @@ func WriteFile(path string, data []byte) error{
     return ioutil.WriteFile(path, data, 0644)
 }
 
-func Demo() *tv{
+func Demo() *Tv{
     xmltvf := NewXMLTVFile()
     xmltvf.Channel = append(xmltvf.Channel, &Channel{Id: "0", Name: "AAAA" })
     xmltvf.Channel = append(xmltvf.Channel, &Channel{Id: "1", Name: "BBBB" })
